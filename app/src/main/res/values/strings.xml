@@ -15,4 +15,5 @@
     <string name="app_offline">No internet connection! Stocks may be out of date&#8230;</string>
     <string name="internet_con_failed">Something went wrong. Please check your internet connection and try again later&#8230;</string>
     <string name="invalid_symbol">Invalid stock symbol!</string>
+    <string name="add_stock">Add a stock</string>
 </resources>
