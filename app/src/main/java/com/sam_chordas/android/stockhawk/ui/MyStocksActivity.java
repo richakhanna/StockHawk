@@ -19,6 +19,7 @@ import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.afollestad.materialdialogs.MaterialDialog;
@@ -36,45 +37,48 @@ import com.sam_chordas.android.stockhawk.service.StockIntentService;
 import com.sam_chordas.android.stockhawk.service.StockTaskService;
 import com.sam_chordas.android.stockhawk.touch_helper.SimpleItemTouchHelperCallback;
 
+import butterknife.BindString;
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
+import static com.sam_chordas.android.stockhawk.ui.StockDetailActivity.TAG_COMPANY_STOCK_SYMBOL;
+
 public class MyStocksActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
 
-    /**
-     * Fragment managing the behaviors, interactions and presentation of the navigation drawer.
-     */
-
-    /**
-     * Used to store the last screen title. For use in {@link #restoreActionBar()}.
-     */
-    private CharSequence mTitle;
-    private Intent mServiceIntent;
-    private ItemTouchHelper mItemTouchHelper;
     private static final int CURSOR_LOADER_ID = 0;
-    private QuoteCursorAdapter mCursorAdapter;
+
     private Context mContext;
-    private Cursor mCursor;
-    boolean isConnected;
+    private CharSequence mTitle;
+    @BindView(R.id.tv_message)
+    TextView mTVMessage;
+
+    @BindString(R.string.network_toast)
+    String mNetworkToast;
+
+    @BindString(R.string.app_offline)
+    String mAppOffline;
+
+    @BindString(R.string.no_stock_add_one)
+    String mNoStockAddOne;
+    private Intent mServiceIntent;
+    private QuoteCursorAdapter mCursorAdapter;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mContext = this;
-        ConnectivityManager cm =
-                (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
-
-        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
-        isConnected = activeNetwork != null &&
-                activeNetwork.isConnectedOrConnecting();
         setContentView(R.layout.activity_my_stocks);
+        ButterKnife.bind(this);
+        mContext = this;
+
         // The intent service is for executing immediate pulls from the Yahoo API
         // GCMTaskService can only schedule tasks, they cannot execute immediately
         mServiceIntent = new Intent(this, StockIntentService.class);
         if (savedInstanceState == null) {
             // Run the initialize task service so that some stocks appear upon an empty database
             mServiceIntent.putExtra("tag", "init");
-            if (isConnected) {
+            if (isConnectedToInternet()) {
                 startService(mServiceIntent);
-            } else {
-                networkToast();
             }
         }
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
@@ -86,10 +90,19 @@ public class MyStocksActivity extends AppCompatActivity implements LoaderManager
                 new RecyclerViewItemClickListener.OnItemClickListener() {
                     @Override
                     public void onItemClick(View v, int position) {
-                        //TODO:
-                        // do something on item click
+                        String symbol = ((TextView) v.findViewById(R.id.stock_symbol)).getText().toString();
+                        Intent intent = new Intent(mContext, StockDetailActivity.class);
+                        intent.putExtra(TAG_COMPANY_STOCK_SYMBOL, symbol);
+                        startActivity(intent);
                     }
                 }));
+        mCursorAdapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
+            @Override
+            public void onChanged() {
+                super.onChanged();
+                refreshLayout();
+            }
+        });
         recyclerView.setAdapter(mCursorAdapter);
 
 
@@ -98,7 +111,7 @@ public class MyStocksActivity extends AppCompatActivity implements LoaderManager
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (isConnected) {
+                if (isConnectedToInternet()) {
                     new MaterialDialog.Builder(mContext).title(R.string.symbol_search)
                             .content(R.string.content_test)
                             .inputType(InputType.TYPE_CLASS_TEXT)
@@ -107,12 +120,14 @@ public class MyStocksActivity extends AppCompatActivity implements LoaderManager
                                 public void onInput(MaterialDialog dialog, CharSequence input) {
                                     // On FAB click, receive user input. Make sure the stock doesn't already exist
                                     // in the DB and proceed accordingly
+                                    String str = new String(input.toString());
+                                    input = str.toUpperCase();
                                     Cursor c = getContentResolver().query(QuoteProvider.Quotes.CONTENT_URI,
                                             new String[]{QuoteColumns.SYMBOL}, QuoteColumns.SYMBOL + "= ?",
                                             new String[]{input.toString()}, null);
                                     if (c.getCount() != 0) {
                                         Toast toast =
-                                                Toast.makeText(MyStocksActivity.this, "This stock is already saved!",
+                                                Toast.makeText(MyStocksActivity.this, R.string.already_saved,
                                                         Toast.LENGTH_LONG);
                                         toast.setGravity(Gravity.CENTER, Gravity.CENTER, 0);
                                         toast.show();
@@ -134,11 +149,11 @@ public class MyStocksActivity extends AppCompatActivity implements LoaderManager
         });
 
         ItemTouchHelper.Callback callback = new SimpleItemTouchHelperCallback(mCursorAdapter);
-        mItemTouchHelper = new ItemTouchHelper(callback);
-        mItemTouchHelper.attachToRecyclerView(recyclerView);
+        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(callback);
+        itemTouchHelper.attachToRecyclerView(recyclerView);
 
         mTitle = getTitle();
-        if (isConnected) {
+        if (isConnectedToInternet()) {
             long period = 3600L;
             long flex = 10L;
             String periodicTag = "periodic";
@@ -159,6 +174,13 @@ public class MyStocksActivity extends AppCompatActivity implements LoaderManager
         }
     }
 
+    private boolean isConnectedToInternet() {
+        ConnectivityManager cm = (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+        return activeNetwork != null && activeNetwork.isConnectedOrConnecting();
+
+    }
+
 
     @Override
     public void onResume() {
@@ -167,7 +189,7 @@ public class MyStocksActivity extends AppCompatActivity implements LoaderManager
     }
 
     public void networkToast() {
-        Toast.makeText(mContext, getString(R.string.network_toast), Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, mNetworkToast, Toast.LENGTH_LONG).show();
     }
 
     public void restoreActionBar() {
@@ -219,12 +241,30 @@ public class MyStocksActivity extends AppCompatActivity implements LoaderManager
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         mCursorAdapter.swapCursor(data);
-        mCursor = data;
     }
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
         mCursorAdapter.swapCursor(null);
+    }
+
+    public void refreshLayout() {
+        if (isConnectedToInternet()) {
+            if (mCursorAdapter.getItemCount() == 0) {
+                mTVMessage.setText(mNoStockAddOne);
+                mTVMessage.setVisibility(View.VISIBLE);
+            } else {
+                mTVMessage.setVisibility(View.GONE);
+            }
+        } else {
+            if (mCursorAdapter.getItemCount() == 0) {
+                mTVMessage.setText(mNetworkToast);
+                mTVMessage.setVisibility(View.VISIBLE);
+            } else {
+                mTVMessage.setVisibility(View.GONE);
+                Toast.makeText(this, mAppOffline, Toast.LENGTH_LONG).show();
+            }
+        }
     }
 
 }

@@ -5,12 +5,16 @@ import android.content.Context;
 import android.content.OperationApplicationException;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.RemoteException;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.google.android.gms.gcm.GcmNetworkManager;
 import com.google.android.gms.gcm.GcmTaskService;
 import com.google.android.gms.gcm.TaskParams;
+import com.sam_chordas.android.stockhawk.R;
 import com.sam_chordas.android.stockhawk.data.QuoteColumns;
 import com.sam_chordas.android.stockhawk.data.QuoteProvider;
 import com.sam_chordas.android.stockhawk.rest.Utils;
@@ -131,7 +135,13 @@ public class StockTaskService extends GcmTaskService {
                     Log.e(LOG_TAG, "Error applying batch insert", e);
                 }
             } catch (IOException e) {
-                e.printStackTrace();
+                Log.e(LOG_TAG, "IOException e : " , e);
+                new Handler(Looper.getMainLooper()).post(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(mContext, R.string.internet_con_failed, Toast.LENGTH_LONG).show();
+                    }
+                });
             }
         }
 

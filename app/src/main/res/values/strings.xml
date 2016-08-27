@@ -10,4 +10,9 @@
     <string name="input_hint">FB</string>
     <string name="input_prefill"></string>
     <string name="network_toast">Uh-oh! This app requires an internet connection</string>
+    <string name="already_saved">This stock is already saved!</string>
+    <string name="no_stock_add_one">Add some stock. Press the + button to add a stock</string>
+    <string name="app_offline">No internet connection! Stocks may be out of date&#8230;</string>
+    <string name="internet_con_failed">Something went wrong. Please check your internet connection and try again later&#8230;</string>
+    <string name="invalid_symbol">Invalid stock symbol!</string>
 </resources>
