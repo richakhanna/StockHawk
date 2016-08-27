@@ -74,6 +74,7 @@ public class StockDetailActivity extends AppCompatActivity {
         } else {
             mLabelsList = savedInstanceState.getStringArrayList(SAVE_ALL_LABELS_LIST);
 
+            mValuesList = new ArrayList<Float>();
             float[] floatValuesArray = savedInstanceState.getFloatArray(SAVE_ALL_VALUES_LIST);
             for (float f : floatValuesArray) {
                 mValuesList.add(f);
@@ -111,7 +112,7 @@ public class StockDetailActivity extends AppCompatActivity {
             // Base URL for the Yahoo query
             urlStringBuilder.append("https://query.yahooapis.com/v1/public/yql?q=");
             urlStringBuilder.append(URLEncoder.encode("select * from yahoo.finance.historicaldata where symbol = " + "\"" + companySymbol + "\""
-                    + " and startDate = " + "\"2014-09-15\"" + " and endDate = " + "\"2015-03-10\"", "UTF-8"));
+                    + " and startDate = " + "\"2015-01-10\"" + " and endDate = " + "\"2015-04-10\"", "UTF-8"));
             // finalize the URL for the API query.
             urlStringBuilder.append("&format=json&diagnostics=true&env=store%3A%2F%2Fdatatables."
                     + "org%2Falltableswithkeys&callback=");
