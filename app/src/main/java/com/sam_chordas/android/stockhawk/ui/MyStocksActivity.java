@@ -1,6 +1,8 @@
 package com.sam_chordas.android.stockhawk.ui;
 
 import android.app.LoaderManager;
+import android.appwidget.AppWidgetManager;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.CursorLoader;
 import android.content.Intent;
@@ -15,6 +17,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
 import android.text.InputType;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -28,6 +31,7 @@ import com.google.android.gms.gcm.PeriodicTask;
 import com.google.android.gms.gcm.Task;
 import com.melnykov.fab.FloatingActionButton;
 import com.sam_chordas.android.stockhawk.R;
+import com.sam_chordas.android.stockhawk.Utils.Constant;
 import com.sam_chordas.android.stockhawk.data.QuoteColumns;
 import com.sam_chordas.android.stockhawk.data.QuoteProvider;
 import com.sam_chordas.android.stockhawk.rest.QuoteCursorAdapter;
@@ -36,15 +40,15 @@ import com.sam_chordas.android.stockhawk.rest.Utils;
 import com.sam_chordas.android.stockhawk.service.StockIntentService;
 import com.sam_chordas.android.stockhawk.service.StockTaskService;
 import com.sam_chordas.android.stockhawk.touch_helper.SimpleItemTouchHelperCallback;
+import com.sam_chordas.android.stockhawk.widget.StockWidgetProvider;
 
 import butterknife.BindString;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-import static com.sam_chordas.android.stockhawk.ui.StockDetailActivity.TAG_COMPANY_STOCK_SYMBOL;
-
 public class MyStocksActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
 
+    private String LOG_TAG = MyStocksActivity.class.getSimpleName();
     private static final int CURSOR_LOADER_ID = 0;
 
     private Context mContext;
@@ -92,7 +96,7 @@ public class MyStocksActivity extends AppCompatActivity implements LoaderManager
                     public void onItemClick(View v, int position) {
                         String symbol = ((TextView) v.findViewById(R.id.stock_symbol)).getText().toString();
                         Intent intent = new Intent(mContext, StockDetailActivity.class);
-                        intent.putExtra(TAG_COMPANY_STOCK_SYMBOL, symbol);
+                        intent.putExtra(Constant.TAG_COMPANY_STOCK_SYMBOL, symbol);
                         startActivity(intent);
                     }
                 }));
@@ -138,6 +142,7 @@ public class MyStocksActivity extends AppCompatActivity implements LoaderManager
                                         mServiceIntent.putExtra("symbol", input.toString());
                                         startService(mServiceIntent);
                                     }
+                                    c.close();
                                 }
                             })
                             .show();
@@ -236,6 +241,8 @@ public class MyStocksActivity extends AppCompatActivity implements LoaderManager
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         mCursorAdapter.swapCursor(data);
+        Log.d(LOG_TAG, "onLoadFinished called ");
+        updateAppWidgets();
     }
 
     @Override
@@ -247,6 +254,7 @@ public class MyStocksActivity extends AppCompatActivity implements LoaderManager
         if (isConnectedToInternet()) {
             if (mCursorAdapter.getItemCount() == 0) {
                 mTVMessage.setText(mNoStockAddOne);
+                mTVMessage.setContentDescription(mNoStockAddOne);
                 mTVMessage.setVisibility(View.VISIBLE);
             } else {
                 mTVMessage.setVisibility(View.GONE);
@@ -254,12 +262,24 @@ public class MyStocksActivity extends AppCompatActivity implements LoaderManager
         } else {
             if (mCursorAdapter.getItemCount() == 0) {
                 mTVMessage.setText(mNetworkToast);
+                mTVMessage.setContentDescription(mNetworkToast);
                 mTVMessage.setVisibility(View.VISIBLE);
             } else {
                 mTVMessage.setVisibility(View.GONE);
                 Toast.makeText(this, mAppOffline, Toast.LENGTH_LONG).show();
             }
         }
+    }
+
+    //To update widget when user adds or deletes a stock
+    private void updateAppWidgets() {
+        ComponentName name = new ComponentName(this, StockWidgetProvider.class);
+        int[] ids = AppWidgetManager.getInstance(this).getAppWidgetIds(name);
+        Intent intent = new Intent(this, StockWidgetProvider.class);
+        intent.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
+        intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, ids);
+        sendBroadcast(intent);
+
     }
 
 }

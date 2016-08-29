@@ -8,4 +8,10 @@
     <dimen name="navigation_drawer_width">240dp</dimen>
 
     <dimen name="fab_margin">16dp</dimen>
+
+    <dimen name="widget_width">300dp</dimen>
+    <dimen name="widget_height">110dp</dimen>
+
+    <dimen name="widget_margin">8dp</dimen>
+
 </resources>

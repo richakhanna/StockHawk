@@ -14,6 +14,7 @@ import com.db.chart.view.AxisController;
 import com.db.chart.view.LineChartView;
 import com.db.chart.view.animation.Animation;
 import com.sam_chordas.android.stockhawk.R;
+import com.sam_chordas.android.stockhawk.Utils.Constant;
 import com.sam_chordas.android.stockhawk.Utils.ProgressBarUtil;
 import com.squareup.okhttp.Callback;
 import com.squareup.okhttp.OkHttpClient;
@@ -36,7 +37,6 @@ import butterknife.ButterKnife;
 public class StockDetailActivity extends AppCompatActivity {
 
     private static final String LOG_TAG = StockDetailActivity.class.getSimpleName();
-    public static final String TAG_COMPANY_STOCK_SYMBOL = "COMPANY_STOCK_SYMBOL";
     public static final String SAVE_ALL_LABELS_LIST = "ALL_LABELS_LIST";
     public static final String SAVE_ALL_VALUES_LIST = "ALL_VALUES_LIST";
 
@@ -58,7 +58,7 @@ public class StockDetailActivity extends AppCompatActivity {
         ButterKnife.bind(this);
 
         mProgressBar = new ProgressBarUtil(this);
-        companySymbol = getIntent().getStringExtra(TAG_COMPANY_STOCK_SYMBOL);
+        companySymbol = getIntent().getStringExtra(Constant.TAG_COMPANY_STOCK_SYMBOL);
         setTitle(companySymbol);
 
 
