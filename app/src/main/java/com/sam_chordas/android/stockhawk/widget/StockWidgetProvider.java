@@ -58,6 +58,9 @@ public class StockWidgetProvider extends AppWidgetProvider {
         // This is how we populate the data.
         rvLayoutList.setRemoteAdapter(R.id.lv_widget_list, intent);
 
+        // The empty view is displayed when the collection has no items.
+        rvLayoutList.setEmptyView(R.id.lv_widget_list, R.id.empty_view);
+
 
         // Individuals items of a collection cannot set up their own pending intents.
         // Instead, the collection as a whole sets up a pending intent template, and
