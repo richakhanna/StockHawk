@@ -14,7 +14,6 @@ Key Features that I did:
 - Allowed the app to be localized for distribution in other countries.
 - Handled error cases in Android.
 
-UI Screenshots:
 ![stocks_list](https://github.com/richakhanna/StockHawk/blob/master/app/screenshots/stocks_list.png) 
 ![stock_details](https://github.com/richakhanna/StockHawk/blob/master/app/screenshots/stock_details.png)
 ![stock_widget](https://github.com/richakhanna/StockHawk/blob/master/app/screenshots/stock_widget.png)
