@@ -15,5 +15,6 @@ Key Features that I did:
 - Handled error cases in Android.
 
 UI Screenshots:
-![stock_hawk](https://github.com/richakhanna/StockHawk/blob/master/app/screenshots/stocks_list.png)(https://github.com/richakhanna/StockHawk/blob/master/app/screenshots/stock_details.png)
-(https://github.com/richakhanna/StockHawk/blob/master/app/screenshots/stock_widget.png)
+![stocks_list](https://github.com/richakhanna/StockHawk/blob/master/app/screenshots/stocks_list.png) 
+![stock_details](https://github.com/richakhanna/StockHawk/blob/master/app/screenshots/stock_details.png)
+![stock_widget](https://github.com/richakhanna/StockHawk/blob/master/app/screenshots/stock_widget.png)
